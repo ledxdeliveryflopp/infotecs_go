@@ -1,7 +1,7 @@
 package settings
 
 import (
-	json2 "encoding/json"
+	"encoding/json"
 	"log"
 )
 
@@ -11,10 +11,10 @@ type ErrorSchemas struct {
 
 func (s ErrorSchemas) buildJson(detail string) ([]byte, error) {
 	s.Detail = detail
-	json, err := json2.Marshal(s)
+	marshalDetail, err := json.Marshal(s)
 	if err != nil {
 		log.Println("error while marshaling json")
 		return nil, err
 	}
-	return json, nil
+	return marshalDetail, nil
 }
