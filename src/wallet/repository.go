@@ -1,9 +1,9 @@
 package wallet
 
 import (
-	"errors"
 	"fmt"
 	"infotecs_go/src/settings"
+	"infotecs_go/src/transaction"
 )
 
 func GetWalletByNumberRepository(number string) (Wallet, error) {
@@ -28,7 +28,7 @@ func UpdateSenderWalletRepository(wallet Wallet, amount float64) error {
 			return err
 		}
 	} else {
-		return errors.New("wallet balance is less than requested")
+		return settings.LowBalance
 	}
 	return nil
 }
@@ -44,12 +44,12 @@ func UpdateRecipientWalletRepository(wallet Wallet, amount float64) error {
 	return nil
 }
 
-func SendMoneyToWalletRepository(from string, to string, amount float64) error {
-	fromWallet, err := GetWalletByNumberRepository(from)
+func SendMoneyToWalletRepository(sender string, recipient string, amount float64) error {
+	fromWallet, err := GetWalletByNumberRepository(sender)
 	if err != nil {
 		return err
 	}
-	toWallet, err := GetWalletByNumberRepository(to)
+	toWallet, err := GetWalletByNumberRepository(recipient)
 	if err != nil {
 		return err
 	}
@@ -58,6 +58,10 @@ func SendMoneyToWalletRepository(from string, to string, amount float64) error {
 		return err
 	}
 	err = UpdateRecipientWalletRepository(toWallet, amount)
+	if err != nil {
+		return err
+	}
+	err = transaction.CreateTransactionRepository(sender, recipient, amount)
 	if err != nil {
 		return err
 	}
