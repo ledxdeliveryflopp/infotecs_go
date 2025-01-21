@@ -43,7 +43,7 @@ func MethodNotAllowed(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusMethodNotAllowed)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("endpoint not found")
+	json, err := errorSchemas.buildJson("method Not Allowed")
 	if err != nil {
 		log.Println("error while build not allowed json", err)
 		return
