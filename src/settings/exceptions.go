@@ -9,7 +9,7 @@ func RaiseError(writer http.ResponseWriter, request *http.Request, detail string
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(code)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson(detail)
+	json, err := errorSchemas.BuildJson(detail)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
 		log.Println("error while build error json", err)
@@ -27,7 +27,7 @@ func WalletDontFound(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNotFound)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("wallet with this number don't found")
+	json, err := errorSchemas.BuildJson("wallet with this number don't found")
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
 		log.Println("error while build error json", err)
@@ -45,7 +45,7 @@ func TransactionsDontFound(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNotFound)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("transactions don't found")
+	json, err := errorSchemas.BuildJson("transactions don't found")
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
 		log.Println("error while build error json", err)
@@ -63,7 +63,7 @@ func EncodingError(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadRequest)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("error while encoding struct")
+	json, err := errorSchemas.BuildJson("error while encoding struct")
 	if err != nil {
 		log.Println("error while build error json", err)
 		return
@@ -79,7 +79,7 @@ func HttpWriteError(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadRequest)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("error while send response")
+	json, err := errorSchemas.BuildJson("error while send response")
 	if err != nil {
 		log.Println("error while build error json", err)
 		return
@@ -95,7 +95,7 @@ func QueryParamConvertError(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadRequest)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("error while converting query param")
+	json, err := errorSchemas.BuildJson("error while converting query param")
 	if err != nil {
 		log.Println("error while build error json", err)
 		return
@@ -111,7 +111,7 @@ func NotEnoughMoneyInWallet(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadRequest)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("wallet balance is less than requested")
+	json, err := errorSchemas.BuildJson("wallet balance is less than requested")
 	if err != nil {
 		log.Println("error while build error json", err)
 		return
@@ -127,7 +127,7 @@ func NotFoundEndpoint(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNotFound)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("endpoint not found")
+	json, err := errorSchemas.BuildJson("endpoint not found")
 	if err != nil {
 		log.Println("error while build not found json", err)
 		return
@@ -143,7 +143,7 @@ func MethodNotAllowed(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusMethodNotAllowed)
 	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.buildJson("method Not Allowed")
+	json, err := errorSchemas.BuildJson("method Not Allowed")
 	if err != nil {
 		log.Println("error while build not allowed json", err)
 		return

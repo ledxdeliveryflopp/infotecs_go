@@ -9,7 +9,7 @@ type ErrorSchemas struct {
 	Detail string `json:"detail"`
 }
 
-func (s ErrorSchemas) buildJson(detail string) ([]byte, error) {
+func (s ErrorSchemas) BuildJson(detail string) ([]byte, error) {
 	s.Detail = detail
 	marshalDetail, err := json.Marshal(s)
 	if err != nil {

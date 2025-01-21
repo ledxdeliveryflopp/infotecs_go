@@ -39,7 +39,7 @@ func GetWalletInfoService(writer http.ResponseWriter, request *http.Request) {
 func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	var sendSchemas SendMoneySchemas
-	decodedData, err := sendSchemas.decodeJson(request.Body)
+	decodedData, err := sendSchemas.DecodeJson(request.Body)
 	switch {
 	case err == io.EOF:
 		settings.RaiseError(writer, request, "empty request body", 400)
@@ -63,8 +63,8 @@ func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request)
 		settings.RaiseError(writer, request, "error while send money to wallet", 400)
 		return
 	}
-	var response BaseStruct
-	builtResponse, err := response.buildJson("success")
+	var response BaseSchemas
+	builtResponse, err := response.BuildJson("success")
 	if err != nil {
 		log.Println("error while build response struct", err)
 		settings.RaiseError(writer, request, "error while build response struct", 400)

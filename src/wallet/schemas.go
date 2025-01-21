@@ -8,11 +8,11 @@ import (
 	"reflect"
 )
 
-type BaseStruct struct {
+type BaseSchemas struct {
 	Detail string `json:"detail"`
 }
 
-func (b BaseStruct) buildJson(detail string) ([]byte, error) {
+func (b BaseSchemas) BuildJson(detail string) ([]byte, error) {
 	b.Detail = detail
 	marshalDetail, err := json.Marshal(b)
 	if err != nil {
@@ -27,7 +27,7 @@ type Wallet struct {
 	Balance float64 `json:"balance"`
 }
 
-func (w Wallet) decodeJson(body io.Reader) (Wallet, error) {
+func (w Wallet) DecodeJson(body io.Reader) (Wallet, error) {
 	err := json.NewDecoder(body).Decode(&w)
 	if err != nil {
 		log.Println("error while unmarshal json", err)
@@ -42,7 +42,7 @@ type SendMoneySchemas struct {
 	Amount float64 `json:"amount"`
 }
 
-func (m SendMoneySchemas) decodeJson(body io.Reader) (SendMoneySchemas, error) {
+func (m SendMoneySchemas) DecodeJson(body io.Reader) (SendMoneySchemas, error) {
 	err := json.NewDecoder(body).Decode(&m)
 	if err != nil {
 		log.Println("error while unmarshal json", err)
