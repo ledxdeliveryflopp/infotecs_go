@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Build docker images
-        run: docker-compose up -d --build
+        run: docker compose up -d --build
       - name: Check running containers
         run: docker ps -a
 
