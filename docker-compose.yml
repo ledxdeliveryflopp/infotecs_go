@@ -1,0 +1,29 @@
+name: Golang
+
+services:
+
+  database:
+    container_name: database
+    image: postgres
+    restart: on-failure
+    environment:
+      POSTGRES_DB: wallet
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    volumes:
+      - database:/data/
+    ports:
+      - "5443:5432"
+
+  api:
+    container_name: api
+    build:
+      ./
+    ports:
+      - "1111:1111"
+    depends_on:
+      - database
+
+
+volumes:
+  database:
