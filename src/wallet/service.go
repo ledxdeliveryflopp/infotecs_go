@@ -19,11 +19,11 @@ func GetWalletInfoService(writer http.ResponseWriter, request *http.Request) {
 		return
 	}
 	wallet, err := GetWalletByNumberRepository(walletNumber)
-	if errors.Is(sql.ErrNoRows, err) {
+	switch {
+	case errors.Is(sql.ErrNoRows, err):
 		settings.WalletDontFound(writer, request)
 		return
-	}
-	if err != nil {
+	case err != nil:
 		log.Println("error while get wallet info: ", err)
 		settings.RaiseError(writer, request, "get wallet info error", 400)
 		return
@@ -50,15 +50,14 @@ func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 	err = SendMoneyToWalletRepository(decodedData.From, decodedData.To, decodedData.Amount)
-	if errors.Is(settings.LowBalance, err) {
+	switch {
+	case errors.Is(settings.LowBalance, err):
 		settings.NotEnoughMoneyInWallet(writer, request)
 		return
-	}
-	if errors.Is(sql.ErrNoRows, err) {
+	case errors.Is(sql.ErrNoRows, err):
 		settings.WalletDontFound(writer, request)
 		return
-	}
-	if err != nil {
+	case err != nil:
 		log.Println("error while send money to wallet", err)
 		settings.RaiseError(writer, request, "error while send money to wallet", 400)
 		return

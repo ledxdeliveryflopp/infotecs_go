@@ -23,11 +23,11 @@ func GetTransactionsInfoService(writer http.ResponseWriter, request *http.Reques
 		return
 	}
 	transactions, err := GetLastTransactionsRepository(transactionsNumber)
-	if errors.Is(err, settings.TransactionNotFound) {
+	switch {
+	case errors.Is(err, settings.TransactionNotFound):
 		settings.TransactionsDontFound(writer, request)
 		return
-	}
-	if err != nil {
+	case err != nil:
 		log.Println("error while get transactions info: ", err)
 		settings.RaiseError(writer, request, "get transactions info error", 400)
 		return
