@@ -9,4 +9,4 @@ SELECT
 
 -- +migrate Down
 -- SQL section 'Down' is executed when this migration is rolled back
-DELETE FROM wallet WHERE id = 1 and id = 2;
+DELETE FROM wallet WHERE id = generate_series(1, 10);
