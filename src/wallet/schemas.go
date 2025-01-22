@@ -1,3 +1,4 @@
+// Package wallet предоставляет функции для работы с кошельками
 package wallet
 
 import (
@@ -8,10 +9,16 @@ import (
 	"reflect"
 )
 
+// BaseSchemas - Базовая информационна структура
 type BaseSchemas struct {
 	Detail string `json:"detail"`
 }
 
+// BuildJson - функция для сериализации структуры BaseSchemas
+//
+// # Аргументы - detail string - информация
+//
+// Возвращаемые значения - error при ошибке сериализации, []byte при удачной сериализации
 func (b BaseSchemas) BuildJson(detail string) ([]byte, error) {
 	b.Detail = detail
 	marshalDetail, err := json.Marshal(b)
@@ -22,11 +29,17 @@ func (b BaseSchemas) BuildJson(detail string) ([]byte, error) {
 	return marshalDetail, nil
 }
 
+// Wallet - Структура кошелька
 type Wallet struct {
 	Number  string  `json:"number"`
 	Balance float64 `json:"balance"`
 }
 
+// DecodeJson - функция для десериализации структуры Wallet
+//
+// Аргументы - body io.Reader - тело запроса(json)
+//
+// Возвращаемые значения - error при ошибке десериализации, Wallet при удачной десериализации
 func (w Wallet) DecodeJson(body io.Reader) (Wallet, error) {
 	err := json.NewDecoder(body).Decode(&w)
 	if err != nil {
@@ -36,12 +49,18 @@ func (w Wallet) DecodeJson(body io.Reader) (Wallet, error) {
 	return w, nil
 }
 
+// SendMoneySchemas - Структура перевода денег с кошелька
 type SendMoneySchemas struct {
 	From   string  `json:"from"`
 	To     string  `json:"to"`
 	Amount float64 `json:"amount"`
 }
 
+// DecodeJson - функция для десериализации структуры SendMoneySchemas
+//
+// Аргументы - body io.Reader - тело запроса(json)
+//
+// Возвращаемые значения - error при ошибке десериализации, SendMoneySchemas при удачной десериализации
 func (m SendMoneySchemas) DecodeJson(body io.Reader) (SendMoneySchemas, error) {
 	err := json.NewDecoder(body).Decode(&m)
 	if err != nil {

@@ -1,3 +1,4 @@
+// Package settings предоставляет функции для настройки приложения
 package settings
 
 import (
@@ -7,15 +8,20 @@ import (
 	"log"
 )
 
-func InitSettings(envPath embed.FS) bool {
+// InitSettings - Функция, для загрузки .env
+//
+// Аргументы: envPath embed.FS - путь к файлу настроек
+//
+// При ошибке вызывает panic()
+func InitSettings(envPath embed.FS) {
 	err := godotenv.Load(envPath, "environment/.env")
 	if err != nil {
 		panic(err)
 	}
 	log.Println("Env inited")
-	return true
 }
 
+// GetDatabaseUrl - Функция, для создания url к бд
 func GetDatabaseUrl() string {
 	host := godotenv.Get("HOST")
 	port := godotenv.Get("PORT")

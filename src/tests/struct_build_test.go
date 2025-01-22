@@ -8,6 +8,7 @@ import (
 	"testing"
 )
 
+// Тестирование функции сериализации wallet.BaseSchemas
 func TestBaseStructBuild(t *testing.T) {
 	var schemas wallet.BaseSchemas
 	schemas.Detail = "test"
@@ -18,6 +19,7 @@ func TestBaseStructBuild(t *testing.T) {
 	}
 }
 
+// Тестирование функции сериализации settings.ErrorSchemas
 func TestErrorStructBuild(t *testing.T) {
 	var schemas settings.ErrorSchemas
 	schemas.Detail = "testError"

@@ -1,3 +1,4 @@
+// Package settings предоставляет функции для настройки приложения
 package settings
 
 import (
@@ -5,6 +6,12 @@ import (
 	"net/http"
 )
 
+// RaiseError - Функция, для вызова ошибки
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request, detail string - информация о ошибке,
+// code int - статус код ошибки
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func RaiseError(writer http.ResponseWriter, request *http.Request, detail string, code int) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(code)
@@ -23,6 +30,11 @@ func RaiseError(writer http.ResponseWriter, request *http.Request, detail string
 	}
 }
 
+// WalletDontFound - Функция, для вызова ошибки которая сообщает что кошелька не существует
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request,
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func WalletDontFound(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNotFound)
@@ -41,6 +53,11 @@ func WalletDontFound(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// TransactionsDontFound - Функция, для вызова ошибки которая сообщает что транзакции не найдены
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request,
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func TransactionsDontFound(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNotFound)
@@ -59,6 +76,11 @@ func TransactionsDontFound(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// EncodingError - Функция, для вызова ошибки которая сообщает что не удается десериализовать json
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request,
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func EncodingError(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadRequest)
@@ -75,22 +97,11 @@ func EncodingError(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
-func HttpWriteError(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Content-Type", "application/json")
-	writer.WriteHeader(http.StatusBadRequest)
-	var errorSchemas ErrorSchemas
-	json, err := errorSchemas.BuildJson("error while send response")
-	if err != nil {
-		log.Println("error while build error json", err)
-		return
-	}
-	_, err = writer.Write(json)
-	if err != nil {
-		log.Println("error while error write json", err)
-		return
-	}
-}
-
+// QueryParamConvertError - Функция, для вызова ошибки которая сообщает что не удается конвертировать query параметр
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request,
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func QueryParamConvertError(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadRequest)
@@ -107,6 +118,11 @@ func QueryParamConvertError(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// NotEnoughMoneyInWallet - Функция, для вызова ошибки которая сообщает что недостаточно средств для перевода
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request,
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func NotEnoughMoneyInWallet(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusBadRequest)
@@ -123,6 +139,11 @@ func NotEnoughMoneyInWallet(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// NotFoundEndpoint - Функция, для вызова ошибки которая сообщает что эндпоинт не найден
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request,
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func NotFoundEndpoint(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusNotFound)
@@ -139,6 +160,11 @@ func NotFoundEndpoint(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// MethodNotAllowed - Функция, для вызова ошибки которая сообщает что эндпоинт не принимает такой метод запроса
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request,
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или nil при ошибке сериализации
 func MethodNotAllowed(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	writer.WriteHeader(http.StatusMethodNotAllowed)

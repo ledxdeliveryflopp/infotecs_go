@@ -7,7 +7,8 @@ import (
 	"testing"
 )
 
-func TestWalletStructBuild(t *testing.T) {
+// Тестирование функции десериализации wallet.Wallet
+func TestWalletStructDecode(t *testing.T) {
 	var schemas wallet.Wallet
 	schemas.Number = "fgreas543"
 	schemas.Balance = 131.1
@@ -19,7 +20,8 @@ func TestWalletStructBuild(t *testing.T) {
 	}
 }
 
-func TestSendMoneyStructBuild(t *testing.T) {
+// Тестирование функции десериализации wallet.SendMoneySchemas
+func TestSendMoneyStructDecode(t *testing.T) {
 	var schemas wallet.SendMoneySchemas
 	schemas.From = "fgreas543"
 	schemas.To = "sdfa3"

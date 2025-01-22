@@ -1,3 +1,4 @@
+// Package transaction предоставляет функции для работы с транзакциями
 package transaction
 
 import (
@@ -7,6 +8,12 @@ import (
 	"log"
 )
 
+// CreateTransactionRepository - Функция, которая создает новый объект транзакции в бд
+//
+// Аргументы: tx *sql.Tx - транзакция бд, sender string - номер кошелька отправителя
+// recipient string - номер кошелька получателя, amount float64 - сумма перевода
+//
+// Возвращаемые значения - error при ошибке добавления транзакции, nil при удачном создании транзакции
 func CreateTransactionRepository(tx *sql.Tx, sender string, recipient string, amount float64) error {
 	queryStr := fmt.Sprintf("INSERT INTO transaction (sender, recipient, amount) VALUES ('%s', '%s', %f)",
 		sender, recipient, amount)
@@ -17,6 +24,11 @@ func CreateTransactionRepository(tx *sql.Tx, sender string, recipient string, am
 	return nil
 }
 
+// GetLastTransactionsRepository - Функция, для получения N последних транзакций в бд
+//
+// Аргументы: limit int - количество выводимых транзакций
+//
+// Возвращаемые значения - error при ошибке получения транзакций, []Transaction при удачном получении транзакций
 func GetLastTransactionsRepository(limit int) ([]Transaction, error) {
 	db := settings.ConnectToBD()
 	queryStr := fmt.Sprintf("SELECT sender, recipient, amount, time FROM transaction ORDER BY time DESC LIMIT %d",

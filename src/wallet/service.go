@@ -1,3 +1,4 @@
+// Package wallet предоставляет функции для работы с кошельками
 package wallet
 
 import (
@@ -11,6 +12,13 @@ import (
 	"net/http"
 )
 
+// GetWalletInfoService - Функция, для получения информации о кошельке
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request
+//
+// Path параметры: address string - номер кошелька
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или Json с информацией о кошельке Wallet
 func GetWalletInfoService(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	walletNumber := mux.Vars(request)["address"]
@@ -36,6 +44,14 @@ func GetWalletInfoService(writer http.ResponseWriter, request *http.Request) {
 	}
 }
 
+// SendMoneyToWalletService - Функция, для отправки денег на другой кошелек
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request
+//
+// Тело запроса: from string - номер кошелька отправителя, to string - номер кошелька получателя
+// amount float64 - сумма перевода
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или Json с информацией BaseSchemas
 func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	var sendSchemas SendMoneySchemas
@@ -69,10 +85,5 @@ func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request)
 		settings.RaiseError(writer, request, "error while build response struct", 400)
 		return
 	}
-	_, err = writer.Write(builtResponse)
-	if err != nil {
-		log.Println("error while send response struct", err)
-		settings.HttpWriteError(writer, request)
-		return
-	}
+	writer.Write(builtResponse)
 }

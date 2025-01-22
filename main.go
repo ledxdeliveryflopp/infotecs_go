@@ -10,12 +10,17 @@ import (
 	"net/http"
 )
 
+// встраивание файла настроек
+//
 //go:embed environment/*
 var env embed.FS
 
+// встраивание файлов миграций
+//
 //go:embed migrations/*.sql
 var dbMigrations embed.FS
 
+// Запуск API
 func main() {
 	router := mux.NewRouter()
 	ApiRouter := router.PathPrefix("/api").Subrouter()

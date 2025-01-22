@@ -1,3 +1,4 @@
+// Package wallet предоставляет функции для работы с кошельками
 package wallet
 
 import (
@@ -7,6 +8,11 @@ import (
 	"infotecs_go/src/transaction"
 )
 
+// GetWalletByNumberRepository - Функция, для получения информации о кошельке по его номеру
+//
+// Аргументы: number string - номер кошелька
+//
+// Возвращаемые значения - error при ошибке получения кошелька, Wallet при удачном получении кошелька
 func GetWalletByNumberRepository(number string) (Wallet, error) {
 	db := settings.ConnectToBD()
 	queryStr := fmt.Sprintf("SELECT number, balance FROM wallet WHERE number = '%s'", number)
@@ -19,9 +25,16 @@ func GetWalletByNumberRepository(number string) (Wallet, error) {
 	return walletInfo, err
 }
 
-func SendMoneyUpdateToWallet(tx *sql.Tx, toWallet Wallet, amount float64) error {
-	newBalance := toWallet.Balance + amount
-	queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance, toWallet.Number)
+// SendMoneyUpdateRecipientWallet - Функция, для обновления кошелька **получателя** при отправке денег
+//
+// Аргументы: tx *sql.Tx - транзакция бд, recipientWallet Wallet - информация о кошельке получателя,
+// amount float64 - сумма перевода
+//
+// Возвращаемые значения - error при ошибке обновления кошелька, nil при удачном обновлении кошелька
+func SendMoneyUpdateRecipientWallet(tx *sql.Tx, recipientWallet Wallet, amount float64) error {
+	newBalance := recipientWallet.Balance + amount
+	queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance,
+		recipientWallet.Number)
 	_, err := tx.Exec(queryStr)
 	if err != nil {
 		return err
@@ -29,10 +42,17 @@ func SendMoneyUpdateToWallet(tx *sql.Tx, toWallet Wallet, amount float64) error 
 	return nil
 }
 
-func SendMoneyUpdateFromWallet(tx *sql.Tx, wallet Wallet, amount float64) error {
-	if wallet.Balance > amount {
-		newBalance := wallet.Balance - amount
-		queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance, wallet.Number)
+// SendMoneyUpdateSenderWallet - Функция, для обновления кошелька отправителя при отправке денег
+//
+// Аргументы: tx *sql.Tx - транзакция бд, senderWallet Wallet - информация о кошельке отправителя,
+// amount float64 - сумма перевода
+//
+// Возвращаемые значения - error при ошибке обновления кошелька, nil при удачном обновлении кошелька
+func SendMoneyUpdateSenderWallet(tx *sql.Tx, senderWallet Wallet, amount float64) error {
+	if senderWallet.Balance > amount {
+		newBalance := senderWallet.Balance - amount
+		queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance,
+			senderWallet.Number)
 		_, err := tx.Exec(queryStr)
 		if err != nil {
 			return err
@@ -43,23 +63,29 @@ func SendMoneyUpdateFromWallet(tx *sql.Tx, wallet Wallet, amount float64) error 
 	return nil
 }
 
+// SendMoneyToWalletRepository - Функция, для перевода денег с одного кошелька на другой
+//
+// Аргументы: sender string - номер кошелька отправителя, recipient string - номер кошелька - получателя,
+// amount float64 - сумма перевода
+//
+// Возвращаемые значения - error при ошибке обновления кошелька, nil при удачном обновлении кошелька
 func SendMoneyToWalletRepository(sender string, recipient string, amount float64) error {
-	fromWallet, err := GetWalletByNumberRepository(sender)
+	senderWallet, err := GetWalletByNumberRepository(sender)
 	if err != nil {
 		return err
 	}
-	toWallet, err := GetWalletByNumberRepository(recipient)
+	recipientWallet, err := GetWalletByNumberRepository(recipient)
 	if err != nil {
 		return err
 	}
 	db := settings.ConnectToBD()
 	tx, _ := db.Begin()
 	defer tx.Rollback()
-	err = SendMoneyUpdateFromWallet(tx, fromWallet, amount)
+	err = SendMoneyUpdateSenderWallet(tx, senderWallet, amount)
 	if err != nil {
 		return err
 	}
-	err = SendMoneyUpdateToWallet(tx, toWallet, amount)
+	err = SendMoneyUpdateRecipientWallet(tx, recipientWallet, amount)
 	if err != nil {
 		return err
 	}

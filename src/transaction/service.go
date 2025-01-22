@@ -1,3 +1,4 @@
+// Package transaction предоставляет функции для работы с транзакциями
 package transaction
 
 import (
@@ -9,6 +10,13 @@ import (
 	"strconv"
 )
 
+// GetTransactionsInfoService - Функция, для получения N последних транзакций
+//
+// Аргументы: writer http.ResponseWriter, request *http.Request
+//
+// Query параметры: count int - количество выводимых записей
+//
+// Возвращаемые значения - Json с ошибкой settings.ErrorSchemas или Json с информацией о транзакциях []Transaction
 func GetTransactionsInfoService(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	transactionsQuery := request.URL.Query().Get("count")
