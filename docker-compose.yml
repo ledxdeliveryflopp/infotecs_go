@@ -5,7 +5,7 @@ services:
   database:
     container_name: database
     image: postgres
-    restart: on-failure
+    restart: on-failure:3
     environment:
       POSTGRES_DB: wallet
       POSTGRES_USER: postgres
@@ -17,6 +17,7 @@ services:
 
   api:
     container_name: api
+    restart: on-failure:3
     build:
       ./
     ports:

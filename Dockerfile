@@ -6,7 +6,7 @@ WORKDIR /build
 
 COPY . .
 
-RUN go mod download && go mod tidy && go build -o /api main.go
+RUN go mod tidy && go mod download && go build -o /api main.go
 
 FROM alpine:3.20.3
 
