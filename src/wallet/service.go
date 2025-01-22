@@ -85,5 +85,10 @@ func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request)
 		settings.RaiseError(writer, request, "error while build response struct", 400)
 		return
 	}
-	writer.Write(builtResponse)
+	_, err = writer.Write(builtResponse)
+	if err != nil {
+		log.Println("error while write response struct", err)
+		settings.RaiseError(writer, request, "write response error, but money transfer success", 400)
+		return
+	}
 }
