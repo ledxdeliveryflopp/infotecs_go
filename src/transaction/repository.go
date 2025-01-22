@@ -1,16 +1,16 @@
 package transaction
 
 import (
+	"database/sql"
 	"fmt"
 	"infotecs_go/src/settings"
 	"log"
 )
 
-func CreateTransactionRepository(sender string, recipient string, amount float64) error {
-	db := settings.ConnectToBD()
+func CreateTransactionRepository(tx *sql.Tx, sender string, recipient string, amount float64) error {
 	queryStr := fmt.Sprintf("INSERT INTO transaction (sender, recipient, amount) VALUES ('%s', '%s', %f)",
 		sender, recipient, amount)
-	_, err := db.Exec(queryStr)
+	_, err := tx.Exec(queryStr)
 	if err != nil {
 		return err
 	}

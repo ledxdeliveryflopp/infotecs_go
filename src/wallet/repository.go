@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"database/sql"
 	"fmt"
 	"infotecs_go/src/settings"
 	"infotecs_go/src/transaction"
@@ -18,28 +19,26 @@ func GetWalletByNumberRepository(number string) (Wallet, error) {
 	return walletInfo, err
 }
 
-func UpdateSenderWalletRepository(wallet Wallet, amount float64) error {
+func SendMoneyUpdateToWallet(tx *sql.Tx, toWallet Wallet, amount float64) error {
+	newBalance := toWallet.Balance + amount
+	queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance, toWallet.Number)
+	_, err := tx.Exec(queryStr)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func SendMoneyUpdateFromWallet(tx *sql.Tx, wallet Wallet, amount float64) error {
 	if wallet.Balance > amount {
-		db := settings.ConnectToBD()
 		newBalance := wallet.Balance - amount
 		queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance, wallet.Number)
-		_, err := db.Exec(queryStr)
+		_, err := tx.Exec(queryStr)
 		if err != nil {
 			return err
 		}
 	} else {
 		return settings.LowBalance
-	}
-	return nil
-}
-
-func UpdateRecipientWalletRepository(wallet Wallet, amount float64) error {
-	db := settings.ConnectToBD()
-	newBalance := wallet.Balance + amount
-	queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance, wallet.Number)
-	_, err := db.Exec(queryStr)
-	if err != nil {
-		return err
 	}
 	return nil
 }
@@ -53,15 +52,22 @@ func SendMoneyToWalletRepository(sender string, recipient string, amount float64
 	if err != nil {
 		return err
 	}
-	err = UpdateSenderWalletRepository(fromWallet, amount)
+	db := settings.ConnectToBD()
+	tx, _ := db.Begin()
+	defer tx.Rollback()
+	err = SendMoneyUpdateFromWallet(tx, fromWallet, amount)
 	if err != nil {
 		return err
 	}
-	err = UpdateRecipientWalletRepository(toWallet, amount)
+	err = SendMoneyUpdateToWallet(tx, toWallet, amount)
 	if err != nil {
 		return err
 	}
-	err = transaction.CreateTransactionRepository(sender, recipient, amount)
+	err = transaction.CreateTransactionRepository(tx, sender, recipient, amount)
+	if err != nil {
+		return err
+	}
+	err = tx.Commit()
 	if err != nil {
 		return err
 	}
