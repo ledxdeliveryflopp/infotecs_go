@@ -8,6 +8,9 @@
 2) Скомпилируйте api -```go build main.go```
 3) Запустите api
 
+**Или**
+1) docker-compose up -d build
+
 P.S - миграции и сидинг бд автоматический
 
 
