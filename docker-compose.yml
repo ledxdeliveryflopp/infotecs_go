@@ -15,6 +15,17 @@ services:
     ports:
       - "5443:5432"
 
+  redis:
+    container_name: redis
+    image: redis:latest
+    environment:
+      - REDIS_PASSWORD=redis
+      - REDIS_DATABASES=4
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis:/data
+
   api:
     container_name: api
     restart: on-failure:3
@@ -28,3 +39,4 @@ services:
 
 volumes:
   database:
+  redis:
