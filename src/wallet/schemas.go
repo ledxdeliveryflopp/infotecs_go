@@ -21,12 +21,12 @@ type BaseSchemas struct {
 // Возвращаемые значения - error при ошибке сериализации, []byte при удачной сериализации
 func (b BaseSchemas) BuildJson(detail string) ([]byte, error) {
 	b.Detail = detail
-	marshalDetail, err := json.Marshal(b)
+	marshaled, err := json.Marshal(b)
 	if err != nil {
 		log.Println("error while marshaling json")
-		return nil, err
+		return marshaled, err
 	}
-	return marshalDetail, nil
+	return marshaled, nil
 }
 
 // Wallet - Структура кошелька
@@ -35,10 +35,20 @@ type Wallet struct {
 	Balance float64 `json:"balance"`
 }
 
-// DecodeJson - функция для десериализации структуры Wallet
+// MarshalBinary - функция для сериализации структуры *Wallet для Redis
 //
-// Аргументы - body io.Reader - тело запроса(json)
+// Возвращаемые значения - error при ошибке сериализации, []byte при удачной сериализации
+func (w *Wallet) MarshalBinary() ([]byte, error) {
+	return json.Marshal(w)
+}
+
+// UnmarshalBinary - функция для десериализации структуры *Wallet для Redis
 //
+// # Аргументы - data []byte - строка из Redis
+//
+// Возвращаемые значения - error при ошибке сериализации
+func (w *Wallet) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &w)
 }
 
 // SendMoneySchemas - Структура перевода денег с кошелька
