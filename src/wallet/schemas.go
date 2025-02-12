@@ -53,19 +53,19 @@ type SendMoneySchemas struct {
 // Аргументы - body io.Reader - тело запроса(json)
 //
 // Возвращаемые значения - error при ошибке десериализации, SendMoneySchemas при удачной десериализации
-func (m SendMoneySchemas) DecodeJson(body io.Reader) (SendMoneySchemas, error) {
+func (m *SendMoneySchemas) DecodeJson(body io.Reader) error {
 	err := json.NewDecoder(body).Decode(&m)
 	if err != nil {
 		log.Println("error while unmarshal json", err)
-		return m, err
+		return err
 	}
 	switch {
 	case reflect.ValueOf(m.From).IsZero() == true:
-		return m, errors.New("empty from field")
+		return errors.New("empty from field")
 	case reflect.ValueOf(m.To).IsZero() == true:
-		return m, errors.New("empty to field")
+		return errors.New("empty to field")
 	case reflect.ValueOf(m.Amount).IsZero() == true:
-		return m, errors.New("empty amount field")
+		return errors.New("empty amount field")
 	}
-	return m, nil
+	return nil
 }

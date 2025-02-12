@@ -55,7 +55,7 @@ func GetWalletInfoService(writer http.ResponseWriter, request *http.Request) {
 func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Content-Type", "application/json")
 	var sendSchemas SendMoneySchemas
-	decodedData, err := sendSchemas.DecodeJson(request.Body)
+	err := sendSchemas.DecodeJson(request.Body)
 	switch {
 	case err == io.EOF:
 		settings.RaiseError(writer, request, "empty request body", 400)
@@ -65,7 +65,7 @@ func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request)
 		settings.EncodingError(writer, request)
 		return
 	}
-	err = SendMoneyToWalletRepository(decodedData.From, decodedData.To, decodedData.Amount)
+	err = SendMoneyToWalletRepository(sendSchemas.From, sendSchemas.To, sendSchemas.Amount)
 	switch {
 	case errors.Is(settings.LowBalance, err):
 		settings.NotEnoughMoneyInWallet(writer, request)
@@ -79,13 +79,13 @@ func SendMoneyToWalletService(writer http.ResponseWriter, request *http.Request)
 		return
 	}
 	var response BaseSchemas
-	builtResponse, err := response.BuildJson("success")
+	marshaledResponse, err := response.BuildJson("success")
 	if err != nil {
 		log.Println("error while build response struct", err)
 		settings.RaiseError(writer, request, "error while build response struct", 400)
 		return
 	}
-	_, err = writer.Write(builtResponse)
+	_, err = writer.Write(marshaledResponse)
 	if err != nil {
 		log.Println("error while write response struct", err)
 		settings.RaiseError(writer, request, "write response error, but money transfer success", 400)
