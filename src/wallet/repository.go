@@ -8,12 +8,30 @@ import (
 	"infotecs_go/src/transaction"
 )
 
-// GetWalletByNumberRepository - Функция, для получения информации о кошельке по его номеру
+func GetWalletByNumberRepository(number string) (Wallet, error) {
+	walletFromCache, err := getWalletFromRedis(number)
+	if err != nil {
+		db := settings.ConnectToBD()
+		queryStr := fmt.Sprintf("SELECT number, balance FROM wallet WHERE number = '%s'", number)
+		row := db.QueryRow(queryStr)
+		var walletInfo Wallet
+		err := row.Scan(&walletInfo.Number, &walletInfo.Balance)
+		if err != nil {
+			return walletInfo, err
+		}
+		saveWalletInRedis(&walletInfo)
+		return walletInfo, err
+	} else {
+		return walletFromCache, nil
+	}
+}
+
+// __getWalletByNumberRepository - Функция, для получения информации о кошельке по его номеру
 //
 // Аргументы: number string - номер кошелька
 //
 // Возвращаемые значения - error при ошибке получения кошелька, Wallet при удачном получении кошелька
-func GetWalletByNumberRepository(number string) (Wallet, error) {
+func __getWalletByNumberRepository(number string) (Wallet, error) {
 	db := settings.ConnectToBD()
 	queryStr := fmt.Sprintf("SELECT number, balance FROM wallet WHERE number = '%s'", number)
 	row := db.QueryRow(queryStr)
@@ -31,14 +49,15 @@ func GetWalletByNumberRepository(number string) (Wallet, error) {
 // amount float64 - сумма перевода
 //
 // Возвращаемые значения - error при ошибке обновления кошелька, nil при удачном обновлении кошелька
-func SendMoneyUpdateRecipientWallet(tx *sql.Tx, recipientWallet Wallet, amount float64) error {
-	newBalance := recipientWallet.Balance + amount
-	queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance,
+func SendMoneyUpdateRecipientWallet(tx *sql.Tx, recipientWallet *Wallet, amount float64) error {
+	recipientWallet.Balance = recipientWallet.Balance + amount
+	queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", recipientWallet.Balance,
 		recipientWallet.Number)
 	_, err := tx.Exec(queryStr)
 	if err != nil {
 		return err
 	}
+	saveWalletInRedis(recipientWallet)
 	return nil
 }
 
@@ -48,10 +67,10 @@ func SendMoneyUpdateRecipientWallet(tx *sql.Tx, recipientWallet Wallet, amount f
 // amount float64 - сумма перевода
 //
 // Возвращаемые значения - error при ошибке обновления кошелька, nil при удачном обновлении кошелька
-func SendMoneyUpdateSenderWallet(tx *sql.Tx, senderWallet Wallet, amount float64) error {
+func SendMoneyUpdateSenderWallet(tx *sql.Tx, senderWallet *Wallet, amount float64) error {
 	if senderWallet.Balance > amount {
-		newBalance := senderWallet.Balance - amount
-		queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", newBalance,
+		senderWallet.Balance = senderWallet.Balance - amount
+		queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", senderWallet.Balance,
 			senderWallet.Number)
 		_, err := tx.Exec(queryStr)
 		if err != nil {
@@ -60,6 +79,7 @@ func SendMoneyUpdateSenderWallet(tx *sql.Tx, senderWallet Wallet, amount float64
 	} else {
 		return settings.LowBalance
 	}
+	saveWalletInRedis(senderWallet)
 	return nil
 }
 
@@ -70,22 +90,22 @@ func SendMoneyUpdateSenderWallet(tx *sql.Tx, senderWallet Wallet, amount float64
 //
 // Возвращаемые значения - error при ошибке обновления кошелька, nil при удачном обновлении кошелька
 func SendMoneyToWalletRepository(sender string, recipient string, amount float64) error {
-	senderWallet, err := GetWalletByNumberRepository(sender)
+	senderWallet, err := __getWalletByNumberRepository(sender)
 	if err != nil {
 		return err
 	}
-	recipientWallet, err := GetWalletByNumberRepository(recipient)
+	recipientWallet, err := __getWalletByNumberRepository(recipient)
 	if err != nil {
 		return err
 	}
 	db := settings.ConnectToBD()
 	tx, _ := db.Begin()
 	defer tx.Rollback()
-	err = SendMoneyUpdateSenderWallet(tx, senderWallet, amount)
+	err = SendMoneyUpdateSenderWallet(tx, &senderWallet, amount)
 	if err != nil {
 		return err
 	}
-	err = SendMoneyUpdateRecipientWallet(tx, recipientWallet, amount)
+	err = SendMoneyUpdateRecipientWallet(tx, &recipientWallet, amount)
 	if err != nil {
 		return err
 	}
