@@ -39,14 +39,6 @@ type Wallet struct {
 //
 // Аргументы - body io.Reader - тело запроса(json)
 //
-// Возвращаемые значения - error при ошибке десериализации, Wallet при удачной десериализации
-func (w Wallet) DecodeJson(body io.Reader) (Wallet, error) {
-	err := json.NewDecoder(body).Decode(&w)
-	if err != nil {
-		log.Println("error while unmarshal json", err)
-		return w, err
-	}
-	return w, nil
 }
 
 // SendMoneySchemas - Структура перевода денег с кошелька
