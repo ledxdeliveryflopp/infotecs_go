@@ -3,7 +3,6 @@ package wallet
 
 import (
 	"database/sql"
-	"fmt"
 	"infotecs_go/src/settings"
 	"infotecs_go/src/transaction"
 )
@@ -12,8 +11,7 @@ func GetWalletByNumberRepository(number string) (Wallet, error) {
 	walletFromCache, err := getWalletFromRedis(number)
 	if err != nil {
 		db := settings.ConnectToBD()
-		queryStr := fmt.Sprintf("SELECT number, balance FROM wallet WHERE number = '%s'", number)
-		row := db.QueryRow(queryStr)
+		row := db.QueryRow("SELECT number, balance FROM wallet WHERE number = $1", number)
 		var walletInfo Wallet
 		err := row.Scan(&walletInfo.Number, &walletInfo.Balance)
 		if err != nil {
@@ -33,8 +31,7 @@ func GetWalletByNumberRepository(number string) (Wallet, error) {
 // Возвращаемые значения - error при ошибке получения кошелька, Wallet при удачном получении кошелька
 func __getWalletByNumberRepository(number string) (Wallet, error) {
 	db := settings.ConnectToBD()
-	queryStr := fmt.Sprintf("SELECT number, balance FROM wallet WHERE number = '%s'", number)
-	row := db.QueryRow(queryStr)
+	row := db.QueryRow("SELECT number, balance FROM wallet WHERE number = $1", number)
 	var walletInfo Wallet
 	err := row.Scan(&walletInfo.Number, &walletInfo.Balance)
 	if err != nil {
@@ -51,9 +48,8 @@ func __getWalletByNumberRepository(number string) (Wallet, error) {
 // Возвращаемые значения - error при ошибке обновления кошелька, nil при удачном обновлении кошелька
 func SendMoneyUpdateRecipientWallet(tx *sql.Tx, recipientWallet *Wallet, amount float64) error {
 	recipientWallet.Balance = recipientWallet.Balance + amount
-	queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", recipientWallet.Balance,
+	_, err := tx.Exec("UPDATE wallet SET balance = $1 WHERE number = $2", recipientWallet.Balance,
 		recipientWallet.Number)
-	_, err := tx.Exec(queryStr)
 	if err != nil {
 		return err
 	}
@@ -70,9 +66,8 @@ func SendMoneyUpdateRecipientWallet(tx *sql.Tx, recipientWallet *Wallet, amount 
 func SendMoneyUpdateSenderWallet(tx *sql.Tx, senderWallet *Wallet, amount float64) error {
 	if senderWallet.Balance > amount {
 		senderWallet.Balance = senderWallet.Balance - amount
-		queryStr := fmt.Sprintf("UPDATE wallet SET balance = %f WHERE number = '%s'", senderWallet.Balance,
+		_, err := tx.Exec("UPDATE wallet SET balance = $1 WHERE number = $2", senderWallet.Balance,
 			senderWallet.Number)
-		_, err := tx.Exec(queryStr)
 		if err != nil {
 			return err
 		}

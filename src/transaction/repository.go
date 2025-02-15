@@ -3,7 +3,6 @@ package transaction
 
 import (
 	"database/sql"
-	"fmt"
 	"infotecs_go/src/settings"
 	"log"
 )
@@ -15,9 +14,8 @@ import (
 //
 // Возвращаемые значения - error при ошибке добавления транзакции, nil при удачном создании транзакции
 func CreateTransactionRepository(tx *sql.Tx, sender string, recipient string, amount float64) error {
-	queryStr := fmt.Sprintf("INSERT INTO transaction (sender, recipient, amount) VALUES ('%s', '%s', %f)",
+	_, err := tx.Exec("INSERT INTO transaction (sender, recipient, amount) VALUES ($1, $2, $3)",
 		sender, recipient, amount)
-	_, err := tx.Exec(queryStr)
 	if err != nil {
 		return err
 	}
@@ -33,9 +31,8 @@ func GetLastTransactionsRepository(limit int) ([]Transaction, error) {
 	TransactionsFromRedis, err := getTransactionFromRedis(limit)
 	if err != nil {
 		db := settings.ConnectToBD()
-		queryStr := fmt.Sprintf("SELECT sender, recipient, amount, time FROM transaction ORDER BY time DESC LIMIT %d",
+		rows, err := db.Query("SELECT sender, recipient, amount, time FROM transaction ORDER BY time DESC LIMIT $1",
 			limit)
-		rows, err := db.Query(queryStr)
 		if err != nil {
 			log.Printf("query messages error: %s", err)
 			return nil, err
