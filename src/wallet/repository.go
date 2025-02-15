@@ -8,7 +8,7 @@ import (
 )
 
 func GetWalletByNumberRepository(number string) (Wallet, error) {
-	walletFromCache, err := getWalletFromRedis(number)
+	walletFromCache, err := GetWalletFromRedis(number)
 	if err != nil {
 		db := settings.ConnectToBD()
 		row := db.QueryRow("SELECT number, balance FROM wallet WHERE number = $1", number)
@@ -17,7 +17,7 @@ func GetWalletByNumberRepository(number string) (Wallet, error) {
 		if err != nil {
 			return walletInfo, err
 		}
-		saveWalletInRedis(&walletInfo)
+		SaveWalletInRedis(&walletInfo)
 		return walletInfo, err
 	} else {
 		return walletFromCache, nil
@@ -53,7 +53,7 @@ func SendMoneyUpdateRecipientWallet(tx *sql.Tx, recipientWallet *Wallet, amount 
 	if err != nil {
 		return err
 	}
-	saveWalletInRedis(recipientWallet)
+	SaveWalletInRedis(recipientWallet)
 	return nil
 }
 
@@ -74,7 +74,7 @@ func SendMoneyUpdateSenderWallet(tx *sql.Tx, senderWallet *Wallet, amount float6
 	} else {
 		return settings.LowBalance
 	}
-	saveWalletInRedis(senderWallet)
+	SaveWalletInRedis(senderWallet)
 	return nil
 }
 

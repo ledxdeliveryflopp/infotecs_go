@@ -11,10 +11,10 @@ var (
 	ctx = context.Background()
 )
 
-// saveWalletInRedis - Функция, сохранения кошелька в кэш Redis
+// SaveWalletInRedis saveWalletInRedis - Функция, сохранения кошелька в кэш Redis
 //
 // Аргументы: w *Wallet - указатель на структуру кошелька
-func saveWalletInRedis(w *Wallet) {
+func SaveWalletInRedis(w *Wallet) {
 	key := fmt.Sprintf("wallet:%s", w.Number)
 	err := settings.RedisClient().Set(ctx, key, w, 0).Err()
 	if err != nil {
@@ -24,12 +24,12 @@ func saveWalletInRedis(w *Wallet) {
 	}
 }
 
-// getWalletFromRedis - Функция, получение кошелька из кэша redis
+// GetWalletFromRedis - Функция, получение кошелька из кэша redis
 //
 // Аргументы: w *Wallet - указатель на структуру кошелька
 //
 // Возвращаемые значения - Сериализованную структуру Wallet или ошибку
-func getWalletFromRedis(walletNumber string) (Wallet, error) {
+func GetWalletFromRedis(walletNumber string) (Wallet, error) {
 	var walletFromCache Wallet
 	key := fmt.Sprintf("wallet:%s", walletNumber)
 	err := settings.RedisClient().Get(ctx, key).Scan(&walletFromCache)
