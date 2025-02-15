@@ -21,12 +21,12 @@ type BaseSchemas struct {
 // Возвращаемые значения - error при ошибке сериализации, []byte при удачной сериализации
 func (b BaseSchemas) BuildJson(detail string) ([]byte, error) {
 	b.Detail = detail
-	marshalDetail, err := json.Marshal(b)
+	marshaled, err := json.Marshal(b)
 	if err != nil {
 		log.Println("error while marshaling json")
-		return nil, err
+		return marshaled, err
 	}
-	return marshalDetail, nil
+	return marshaled, nil
 }
 
 // Wallet - Структура кошелька
@@ -35,18 +35,20 @@ type Wallet struct {
 	Balance float64 `json:"balance"`
 }
 
-// DecodeJson - функция для десериализации структуры Wallet
+// MarshalBinary - функция для сериализации структуры *Wallet для Redis
 //
-// Аргументы - body io.Reader - тело запроса(json)
+// Возвращаемые значения - error при ошибке сериализации, []byte при удачной сериализации
+func (w *Wallet) MarshalBinary() ([]byte, error) {
+	return json.Marshal(w)
+}
+
+// UnmarshalBinary - функция для десериализации структуры *Wallet для Redis
 //
-// Возвращаемые значения - error при ошибке десериализации, Wallet при удачной десериализации
-func (w Wallet) DecodeJson(body io.Reader) (Wallet, error) {
-	err := json.NewDecoder(body).Decode(&w)
-	if err != nil {
-		log.Println("error while unmarshal json", err)
-		return w, err
-	}
-	return w, nil
+// # Аргументы - data []byte - строка из Redis
+//
+// Возвращаемые значения - error при ошибке сериализации
+func (w *Wallet) UnmarshalBinary(data []byte) error {
+	return json.Unmarshal(data, &w)
 }
 
 // SendMoneySchemas - Структура перевода денег с кошелька
@@ -61,19 +63,19 @@ type SendMoneySchemas struct {
 // Аргументы - body io.Reader - тело запроса(json)
 //
 // Возвращаемые значения - error при ошибке десериализации, SendMoneySchemas при удачной десериализации
-func (m SendMoneySchemas) DecodeJson(body io.Reader) (SendMoneySchemas, error) {
+func (m *SendMoneySchemas) DecodeJson(body io.Reader) error {
 	err := json.NewDecoder(body).Decode(&m)
 	if err != nil {
 		log.Println("error while unmarshal json", err)
-		return m, err
+		return err
 	}
 	switch {
 	case reflect.ValueOf(m.From).IsZero() == true:
-		return m, errors.New("empty from field")
+		return errors.New("empty from field")
 	case reflect.ValueOf(m.To).IsZero() == true:
-		return m, errors.New("empty to field")
+		return errors.New("empty to field")
 	case reflect.ValueOf(m.Amount).IsZero() == true:
-		return m, errors.New("empty amount field")
+		return errors.New("empty amount field")
 	}
-	return m, nil
+	return nil
 }
